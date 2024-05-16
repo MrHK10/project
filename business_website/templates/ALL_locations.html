@@ -4,31 +4,41 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
     #map {
-        width: 100%;
-        height: 500px;
-       
+        width: 123%;
+        height: 407px;
         margin-bottom: 20px;
+        margin-left: -159px;
+        border-radius:20px;
+        background-color: rgba(255, 255, 255, 0.2);
     }
 
     .company-header {
-       
-        color: #fff;
-        padding: 20px;
+        {% comment %} background-color: rgba(255, 255, 255, 0.8); {% endcomment %}
+        {% comment %} background-image: linear-gradient(180deg, #000000 10%, #27396d 100%);
+        color: #fff; {% endcomment %}
+        padding: 0px;
         border-top-left-radius: 20px;
         border-top-right-radius: 20px;
         margin-bottom: 20px;
-        
     }
-    h1, h1 {
-        font-size: 2.5rem;
+
+    h1,
+    h1 {
+        font-size: 2.0rem;
     }
+
     .company-details {
         background-color: #f9f9f9;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
-        width: 100%;
+        width: 125%;
+        margin-left: -170px;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+    .company-details:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8); /* Add shadow on hover */
     }
 
     .company-details h2 {
@@ -66,19 +76,79 @@
         margin-bottom: 5px;
         font-size: 14px;
     }
+
+    .recommendation-card {
+        margin-left:20px;
+        width: 430px; /* Set height to match the map */
+        height: 666px;
+    overflow-y: auto; /* Enable vertical scroll */
+    background-color: rgba(255, 255, 255, 0.8);
+    }
+    
+
+    .recommendation-item {
+        background-color: rgba(255, 255, 255, 0.2);
+        background-color: #fff; 
+        border-radius: 5px;
+        padding: 10px;
+        color: black;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .recommendation-item:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8); /* Add shadow on hover */
+    }
+
+    .recommendation-item h4 {
+        margin-top: 0;
+        margin-bottom: 5px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .recommendation-item p {
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    a {
+        color: black; /* Set text color to black */
+        text-decoration: none; /* Remove underline */
+    }
+    @media (max-width: 768px) {
+        .recommendation-card {
+            width: 100%; /* Adjust width for smaller screens */
+            margin-left: 0; /* Remove left margin */
+            margin-top: 20px; /* Add some top margin */
+        }
+    }
+
+    @media (max-width: 768px) {
+        .company-details {
+            width: 100%; /* Adjust width for smaller screens */
+            margin-left: 0; /* Remove left margin */
+            margin-top: 20px; /* Add some top margin */
+        }
+    }
+    @media (max-width: 768px) {
+        #map {
+            width: 100%; /* Adjust width for smaller screens */
+            margin-left: 0; /* Remove left margin */
+            margin-top: 20px; /* Add some top margin */
+        }
+    }
+    
 </style>
 
 <div class="container">
-    <!-- Company Header -->
-    <div class="company-header">
-        <h1>{{ job.company_name }}</h1>
-    </div>
-
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <!-- Display company details -->
             <div class="company-details">
-                <h2>Company Details</h2>
+                <div class="company-header">
+                <h1><strong>{{ job.company_name }}</strong></h1>
+                </div>
+                {% comment %} <h2>Company Details</h2> {% endcomment %}
                 <div class="row">
                     <div class="col-md-6">
                         <p><strong>Website:</strong> <a href="{{ job.website }}">{{ job.website }}</a></p>
@@ -97,7 +167,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Company</strong> {{ job.job_type }}</p>
+                        <p><strong>Job Type:</strong> {{ job.job_type }}</p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Founded:</strong> {{ job.founded }}</p>
@@ -112,54 +182,35 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+            <div id="map"></div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div id="map"></div>
-            </div>
+            
+             
         </div>
         <div class="col-md-4">
-            <!-- Display location details -->
-            <div class="card">
+            <!-- Display recommendation cards -->
+            <div class="card recommendation-card">
                 <div class="card-body">
-                    <h2>Company Locations</h2>
-                    <div class="location-list">
-                        {% for location in locations %}
-                        <div class="location-item">
-                            <h4>{{ location.location_name }}</h4>
-                            <p><strong>Latitude:</strong> {{ location.latitude }}</p>
-                            <p><strong>Longitude:</strong> {{ location.longitude }}</p>
+                    <h2>Recommendations based on Industry</h2>
+                    <div class="recommendation-list">
+                        {% for company in random_companies %}
+                        <div class="recommendation-item">
+                            <a href="{% url 'Alllocations' company_name=company.company_name %}" >
+                          
+                            <h4><strong>{{ company.company_name }}</strong></h4>
+                            <p><strong>Industry:</strong> {{ company.industry }}</p>
+                            <p><strong>Location:</strong> {{ company.job_location }}</p>
+                            <p><strong>Employees:</strong> {{ company.employees }}</p>
+                            <p><strong>More Locations: </strong><a href="{% url 'Alllocations' company_name=job.company_name %}">{{ job.locations }}</a></p>
+                   
                         </div>
+                    </a>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-<!-- Add this section to display recommended companies -->
-<!-- Recommended Companies Section -->
-<h1><b>Recommendations based on Industry</b></h1>
-<div class="row">
-    {% for company in random_companies %}
-    <div class="col-md-4 mb-4">
-        <div class="card border-primary h-100">
-            <div class="card-body">
-                <h5 class="card-title text-primary">{{ company.company_name }}</h5>
-                <p class="card-text"><strong>Industry:</strong> {{ company.industry }}</p>
-                <p class="card-text"><strong>Location:</strong> {{ company.job_location }}</p>
-                <p class="card-text"><strong>Employees:</strong> {{ company.employees }}</p>
-                <p><strong>More Locations: </strong><a href="{% url 'Alllocations' company_name=job.company_name %}">{{ job.locations }}</a></p>
-                <!-- Add other company details as needed -->
-            </div>
-           
-        </div>
-    </div>
-    {% endfor %}
-</div>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -192,3 +243,7 @@
 </script>
 
 {% endblock body %}
+
+
+
+

@@ -3,120 +3,127 @@
 {% block title %}Company_list{% endblock title %}
 
 {% block body %}
+<style>
+.card {
+    transition: transform 0.3s ease-in-out; /* Add transition for transform property */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Move the card up by 5 pixels on hover */
+}
+</style>
+
 <!-- team section -->
 <section class="team_section layout_padding">
     <div class="heading_container heading_center">
-        <h2 class="">
+        <h2 class="" style="color: black;">
             Compa<span>nies</span>
         </h2>
     </div>
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-9">
-                <form method="GET" action="{% url 'Company_list' %}" class="form-inline my-2 my-lg-0">
+                <form method="GET" action="{% url 'Company_list' %}" class="form-inline my-2 my-lg-0" style="margin-left: 25px;">
                     <input class="form-control mr-sm-2" type="text" name="search_query" placeholder="Search by company" value="{{ search_query }}">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
+                
             </div>
             <div class="col-lg-3">
-                <button id="add-company-btn" class="btn btn-primary" data-toggle="modal" data-target="#add-company-modal">Add Company</button>
+                <button id="add-company-btn"  style="margin-left: 170px;"class="btn btn-primary" data-toggle="modal" data-target="#add-company-modal">Add Company</button>
             </div>
         </div>
     </div>
     <div class="container-fluid">
-
         <div class="team_container">
             <div class="row">
                 {% for job in jobs %}
-                <div class="col-lg-3 col-sm-6">
-                    <div class="box ">
-                        <div class="detail-box">
-                            <h5>
-                                {{ job.company_name }}
-                            </h5>
-                            <p>
-                                <p class="card-text"> <a href="{{ job.website }}">{{ job.website }}</a></p>
-                            </p>
-                            <p class="card-text"><strong>Employees:</strong> {{ job.employees }}</p>
-                            {% comment %} <p class="card-text"><strong>Industry:</strong> {{ job.industry }}</p> {% endcomment %}
-                            <p class="card-text"><strong>Headquarters: </strong><a href=''>{{ job.job_location }}</p></a>
-                            <p><strong>More Locations: </strong><a href="{% url 'Alllocations' company_name=job.company_name %}">{{ job.locations }}</a></p>
+                <div class="col-md-4 mb-4" style="margin-top: 15px;"> <!-- Added margin-top inline style -->
+                    <div class="card border-primary h-100">
+                        <a href="{% url 'Alllocations' company_name=job.company_name %}">
+                        <div class="card-body text-black"> <!-- Added text-white class here -->
+                            <h5 class="card-title text-primary">{{ job.company_name }}</h5>
+                            <p class="card-text" style="color: black;"><strong>Industry:</strong> {{ job.industry }}</p> <!-- Added inline style for text color -->
+                            <p class="card-text" style="color: black;"><strong>Location:</strong> {{ job.job_location }}</p> <!-- Added inline style for text color -->
+                            <p class="card-text" style="color: black;"><strong>Employees:</strong> {{ job.employees }}</p> <!-- Added inline style for text color -->
+                            <p><strong style="color: black;">More Locations: </strong><a href="{% url 'Alllocations' company_name=job.company_name %}" class="text-black">{{ job.locations }}</a></p>
+                            <!-- Add other company details as needed -->
                         </div>
                     </div>
+                </a>
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Popup box for adding a company -->
-            <div class="modal fade" id="add-company-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Add Company</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form action="{% url 'Company_list' %}" method="post">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Company Name" id="company_name" name="company_name" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="url" class="form-control" placeholder="Website" id="website" name="website" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Location" id="job_location" name="job_location" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Employees" id="employees" name="employees" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Locations" id="locations" name="locations" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Type" id="job_type" name="job_type" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Founded" id="founded" name="founded" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Revenue" id="revenue" name="revenue" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Industry" id="industry" name="industry" required>
-                                </div>
-                                <div class="form-group">
-                                    <textarea class="form-control" rows="3" placeholder="All Location Info" id="all_location_info" name="all_location_info" required></textarea>
-                                </div>
-                                <!-- Add other fields here -->
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Pagination -->
-            <div class="row justify-content-center mt-3"> <!-- Center alignment and top margin -->
-                <div class="pagination mx-auto"> <!-- Center the pagination -->
-                    {% if jobs.has_previous %}
-                    <a href="?page=1">&laquo; First</a>
-                    <a href="?page={{ jobs.previous_page_number }}">Previous</a>
-                    {% endif %}
-                    <span class="current">Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}.</span>
-                    {% if jobs.has_next %}
-                    <a href="?page={{ jobs.next_page_number }}">Next</a>
-                    <a href="?page={{ jobs.paginator.num_pages }}">Last &raquo;</a>
-                    {% endif %}
-                </div>
-            </div>
-            <!-- End Pagination -->
         </div>
     </div>
-</section>
+    
 
-<!-- end team section -->
+<!-- Popup box for adding a company -->
+<div class="modal fade" id="add-company-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Company</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h2 style='color:black'><strong>Add Your Company</strong><h1>
+                <form action="{% url 'Company_list' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Company Name" id="company_name" name="company_name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="url" class="form-control" placeholder="Website" id="website" name="website" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Location" id="job_location" name="job_location" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Employees" id="employees" name="employees" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Locations" id="locations" name="locations" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Type" id="job_type" name="job_type" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Founded" id="founded" name="founded" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Revenue" id="revenue" name="revenue" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Industry" id="industry" name="industry" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3" placeholder="All Location Info" id="all_location_info" name="all_location_info" required></textarea>
+                    </div>
+                    <!-- Add other fields here -->
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="row justify-content-center mt-3"> <!-- Center alignment and top margin -->
+    <div class="pagination mx-auto"> <!-- Center the pagination -->
+        {% if jobs.has_previous %}
+        <a href="?page=1">&laquo; First</a>
+        <a href="?page={{ jobs.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span class="current" style="color: black;">Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}.</span>
+        {% if jobs.has_next %}
+        <a href="?page={{ jobs.next_page_number }}">Next</a>
+        <a href="?page={{ jobs.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
+    </div>
+</div>
+<!-- End Pagination -->
 
 {% endblock body %}

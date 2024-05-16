@@ -1,6 +1,8 @@
 from django.contrib import admin
-
-# Register your models here.
 from .models import Job
 
-admin.site.register(Job)
+class CompanyAdmin(admin.ModelAdmin):
+    search_fields = ['company_name', 'job_location', 'industry']
+    list_filter = ['job_type', 'industry', 'employees']
+
+admin.site.register(Job, CompanyAdmin)

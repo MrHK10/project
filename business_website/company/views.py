@@ -15,6 +15,10 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Count, Avg, F
+from .models import Job
+from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
+from .forms import JobForm  # Import your JobForm
 from django.contrib.auth.decorators import login_required
 from .models import Job
 from geopy.geocoders import Nominatim
@@ -22,6 +26,12 @@ import re
 from django.db.models import Func, F, Value, CharField
 from django.db.models import Value, DecimalField
 from django.db.models.functions import Cast
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib import messages  # Import messages framework
 from django.db.models import Min, Max
 from django.http import HttpResponse
 import matplotlib.pyplot as plt
@@ -36,42 +46,57 @@ import base64
 from django.shortcuts import render
 from .models import Job
 from django.db.models import Q
+from django.shortcuts import render
+from django.shortcuts import render,HttpResponse,redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth.decorators import login_required
 
-
-
-
-
-
+# Create your views here.
+def landing_page(request):
+    return render(request, 'index.html')
 
 class ExtractNumeric(Func):
     function = 'regexp_replace'
     template = "%(function)s(%(expressions)s, '[^\d.]+', '', 'g')"
     output_field = CharField()
-# Create your views here.
-def landing_page(request):
-    return render(request, 'index.html')
 
+
+def extract_numeric_revenue(revenue):
+    # Extract numeric values from the revenue string
+    # Assuming the revenue string is in the format "Revenue: $X to $Y billion (USD)"
+    # Extract the numeric part between "$" and " billion"
+    revenue_numeric = re.search(r'\$(\d+(\.\d+)?) to \$(\d+(\.\d+)?) billion', revenue)
+    if revenue_numeric:
+        return (float(revenue_numeric.group(1)) + float(revenue_numeric.group(3))) / 2  # Calculate the average revenue
+    else:
+        return 0  # Return 0 if numeric value cannot be extracted
+
+from django.db.models import Count
+from django.shortcuts import render
+from .models import Job
+import json
+@login_required
 def dashboard(request):
     total_companies = Job.objects.values('company_name').distinct().count()
     total_website_count = Job.objects.values('website').distinct().count()
 
     # Fetch the data of the first 10 companies excluding those with unknown or non-applicable revenue
-    first_10_companies = Job.objects.exclude(Q(revenue='Unknown') | Q(revenue='Non-Applicable')).order_by('revenue')[:10]
+    first_10_companies = Job.objects.exclude(Q(revenue='Unknown') | Q(revenue='Non-Applicable')).order_by('revenue')[2:10]
 
     # Prepare data for the chart
     companies = [company.company_name for company in first_10_companies]
     revenues = [company.revenue for company in first_10_companies]
 
-    # Create the bar chart
+    # Create the horizontal bar chart
     fig, ax = plt.subplots(figsize=(10, 10))  # Adjust the figure size here (width, height)
-    bars = ax.bar(companies, revenues)
-    ax.set_ylabel('Revenue')
-    ax.set_title('First 10 Companies with Known Revenue')
-    ax.tick_params(axis='x', rotation=30)  # Rotate x-axis tick labels by 30 degrees
+    bars = ax.barh(companies, revenues)  # Use barh() for horizontal bars
+    ax.set_xlabel('Revenue', fontsize=36)  # Set xlabel for horizontal bar chart with increased font size
+     # Increase the font size of the title
 
     # Annotate the bars with revenue values
     for bar, revenue in zip(bars, revenues):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{revenue}', ha='center', va='bottom')
+        ax.text(bar.get_width(), bar.get_y() + bar.get_height() / 2, f'{revenue}', va='center', fontsize=10)  # Increase the font size of annotations
 
     # Save the chart to a BytesIO buffer
     buffer = BytesIO()
@@ -90,10 +115,6 @@ def dashboard(request):
     })
 
 
-from .models import Job
-from django.shortcuts import render, redirect
-from django.core.paginator import Paginator
-from .forms import JobForm  # Import your JobForm
 
 def Company_list(request):
     jobs_list = Job.objects.all()
@@ -117,7 +138,7 @@ def Company_list(request):
         form = JobForm(request.POST)  # Bind the form with POST data
         if form.is_valid():
             form.save()  # Save the form data to the database
-            return redirect('company_list')  # Redirect to the same page after successful submission
+            return redirect('Company_list')  # Redirect to the same page after successful submission
     else:
         form = JobForm()  # Create a new instance of the form
 
@@ -190,6 +211,7 @@ def extract_location_info(all_location_info):
             print("Invalid format for location info:", loc)
     return extracted_info
 from django.shortcuts import get_object_or_404
+@login_required
 def Alllocations(request, company_name):
     locations_data = Job.objects.filter(company_name=company_name).values_list('all_location_info', flat=True).distinct()
     job = get_object_or_404(Job, company_name=company_name)
@@ -215,3 +237,42 @@ def Alllocations(request, company_name):
 
 def about(request):
         return render(request, 'about.html')
+    
+@login_required
+def job(request):
+        return render(request, 'job.html')
+    
+
+def SignupPage(request):
+    if request.method=='POST':
+        uname=request.POST.get('username')
+        email=request.POST.get('email')
+        pass1=request.POST.get('password1')
+        pass2=request.POST.get('password2')
+
+        if pass1!=pass2:
+            return HttpResponse("Your password and confrom password are not Same!!")
+        else:
+
+            my_user=User.objects.create_user(uname,email,pass1)
+            my_user.save()
+            return redirect('login')
+
+    return render (request,'signup.html')
+
+def LoginPage(request):
+    if request.method=='POST':
+        username=request.POST.get('username')
+        pass1=request.POST.get('pass')
+        user=authenticate(request,username=username,password=pass1)
+        if user is not None:
+            login(request,user)
+            return redirect('landing_page')
+        else:
+            return HttpResponse ("Username or Password is incorrect!!!")
+
+    return render (request,'login.html')
+
+def LogoutPage(request):
+    logout(request)
+    return redirect('login')

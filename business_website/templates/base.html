@@ -12,6 +12,7 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
   <link rel="shortcut icon" href="images/favicon.png" type="">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <title> {% block title %}{% endblock title %} </title>
 
@@ -28,7 +29,7 @@
   <link href="{%static 'css/font-awesome.min.css'%}" rel="stylesheet" />
 
   <!-- Custom styles for this template -->
-  <link href="{% static 'css/style.css'%}" rel="stylesheet" />
+  <link href="{% static 'css/style3.css'%}" rel="stylesheet" />
   <!-- responsive style -->
   <link href="{%static 'css/responsive.css' %}" rel="stylesheet" />
   {% block extra_css %} {% endblock extra_css %}
@@ -50,7 +51,7 @@
         <nav class="navbar navbar-expand-lg custom_nav-container ">
           <a class="navbar-brand" href="index.html">
             <span>
-              LRANJ
+              CorprateHUB
             </span>
           </a>
 
@@ -66,21 +67,30 @@
               <li class="nav-item">
                 <a class="nav-link" href="{% url "about" %}"> About</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="service.html">Services</a>
-              </li>
+             
               <li class="nav-item">
                 <a class="nav-link" href="{% url "dashboard" %}">dashboard</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="{% url "Company_list" %}">companies</a>
               </li>
+              {% if user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link" href="#"> <i class="fa fa-user" aria-hidden="true"></i> Login</a>
+                <a class="nav-link" href="#">Welcome, {{ user.username }}</a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">
+                  <i class="fa fa-user" aria-hidden="true"></i> Login
+                </a>
+              </li>
+            {% endif %}
               <form class="form-inline">
                 <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
-                  <i class="fa fa-search" aria-hidden="true"></i>
+                  {% comment %} <i class="fa fa-search" aria-hidden="true"></i> {% endcomment %}
                 </button>
               </form>
             </ul>
@@ -98,16 +108,12 @@
     <div class="container">
       <div class="row">
         <div class="col-md-6 col-lg-3 info_col">
-          <div class="info_contact">
-            <h4>
-              Address
-            </h4>
+          {% comment %} <div class="info_contact">
+            
             <div class="contact_link_box">
               <a href="">
                 <i class="fa fa-map-marker" aria-hidden="true"></i>
-                <span>
-                  Location
-                </span>
+                
               </a>
               <a href="">
                 <i class="fa fa-phone" aria-hidden="true"></i>
@@ -122,7 +128,7 @@
                 </span>
               </a>
             </div>
-          </div>
+          </div> {% endcomment %}
           <div class="info_social">
             <a href="">
               <i class="fa fa-facebook" aria-hidden="true"></i>
@@ -144,7 +150,7 @@
               Info
             </h4>
             <p>
-              necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful
+             we are CorprateHUB , we are here to help you find the best company for your needs.
             </p>
           </div>
         </div>
@@ -154,18 +160,18 @@
               Links
             </h4>
             <div class="info_links">
-              <a class="active" href="index.html">
+              <a class="active" href="{% url "landing_page" %}">
                 Home
               </a>
-              <a class="" href="about.html">
+              <a class="" href="{% url "about" %}">
                 About
               </a>
-              <a class="" href="service.html">
-                Services
+              <a class="" href="{% url "dashboard" %}">
+                dashboard
               </a>
-              <a class="" href="why.html">
+              {% comment %} <a class="" href="why.html">
                 Why Us
-              </a>
+              </a> {% endcomment %}
               <a class="" href="{% url "Company_list" %}">
                 Companies
               </a>

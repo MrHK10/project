@@ -11,7 +11,7 @@ class Job(models.Model):
     revenue = models.CharField(max_length=100)  # Revenue
     industry = models.CharField(max_length=100)  # Industry
     all_location_info = models.TextField()  # All Location Info
-
+    
     def __str__(self):
         return self.company_name + ' - ' + self.job_location
 
